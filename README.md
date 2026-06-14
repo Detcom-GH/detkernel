@@ -1,3 +1,5 @@
+![detkernel logo](detkernel_logo.png)
+
 # detkernel
 
 A custom Linux kernel built specifically for AMD-powered ThinkPads. Strips everything that doesn't belong — Intel, NVIDIA, legacy drivers, other vendor-specific features, dead protocols, server-only subsystems — leaving a leaner, more responsive kernel tuned for the hardware that's actually in your machine.
