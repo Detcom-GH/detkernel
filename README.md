@@ -49,7 +49,7 @@ Download the release for your bootloader from the [Releases](https://github.com/
 
 Copy the `.efi` file to your EFI partition:
 
-```bash
+```
 sudo cp detkernel-universal.efi /boot/EFI/Linux/
 ```
 
@@ -61,7 +61,7 @@ That's it — no additional configuration needed. The `.efi` file is a Unified K
 
 Copy the kernel and initramfs to your boot partition:
 
-```bash
+```
 sudo cp vmlinuz-detkernel-universal /boot/
 sudo cp initramfs-detkernel-universal.img /boot/
 ```
@@ -78,7 +78,7 @@ menuentry "detkernel-universal" {
 
 Replace `YOUR_UUID` with your root partition UUID (find it with `blkid`), then update GRUB:
 
-```bash
+```
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
@@ -86,7 +86,7 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 Copy the kernel and initramfs to your boot partition:
 
-```bash
+```
 sudo cp vmlinuz-detkernel-universal /boot/
 sudo cp initramfs-detkernel-universal.img /boot/
 ```
@@ -111,11 +111,23 @@ Go into your BIOS/UEFI settings and disable Secure Boot.
 
 **Option 2 — Enroll your own MOK key** (keeps Secure Boot enabled)
 
-```bash
-# Install sbsigntools (Arch/Manjaro)
+Install sbsigntools for your distro:
+
+```
+# Arch (-based)
 sudo pacman -S sbsigntools
 
-# Generate a key pair
+# Fedora (-based)
+sudo dnf install sbsigntools
+
+# Debian (-based)
+sudo apt install sbsigntool
+```
+
+Then generate a key, sign the kernel, and enroll the key:
+
+```
+# Generate a key pair (do this once)
 openssl req -new -x509 -newkey rsa:2048 -keyout MOK.key -out MOK.crt \
   -days 3650 -subj "/CN=detkernel MOK/" -nodes
 
@@ -136,13 +148,13 @@ Reboot, follow the MOK enrollment prompt, and Secure Boot will accept the kernel
 
 ### systemd-boot
 
-```bash
+```
 sudo rm /boot/EFI/Linux/detkernel-universal.efi
 ```
 
 ### GRUB / rEFInd
 
-```bash
+```
 sudo rm /boot/vmlinuz-detkernel-universal
 sudo rm /boot/initramfs-detkernel-universal.img
 ```
