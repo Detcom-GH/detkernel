@@ -1,8 +1,8 @@
-![detkernel logo](detkernel_logo.png)
-
 # detkernel
 
-A custom Linux kernel built specifically for AMD-powered ThinkPads. Strips everything that doesn't belong — Intel, NVIDIA, legacy drivers, other vendor-specific features, dead protocols, server-only subsystems — leaving a leaner, more responsive kernel tuned for the hardware that's actually in your machine.
+![detkernel logo](detkernel_logo.png)
+
+A custom Linux kernel built specifically for AMD-powered ThinkPads. Strips everything that doesn't belong — Intel, NVIDIA, legacy drivers, dead protocols, server-only subsystems — leaving a leaner, more responsive kernel tuned for the hardware that's actually in your machine.
 
 Faster boot. Better responsiveness. Slightly better performance. Lower power consumption.
 
@@ -27,7 +27,9 @@ Faster boot. Better responsiveness. Slightly better performance. Lower power con
 
 ### detkernel-universal
 Built with `-march=x86-64-v3`, compatible with all AMD Zen1+ ThinkPads (T495 and newer). The safe choice if you're unsure which variant to use.
-Includes NTSYNC (NT synchronization primitives for Wine/Proton) as a module
+
+Includes:
+- NTSYNC (NT synchronization primitives for Wine/Proton) as a module
 
 ### detkernel-zen5
 Built with `-march=znver5`, optimized specifically for Zen5 (Ryzen AI 300 series). Includes additional tuning:
@@ -47,7 +49,7 @@ Download the release for your bootloader from the [Releases](https://github.com/
 
 Copy the `.efi` file to your EFI partition:
 
-```
+```bash
 sudo cp detkernel-universal.efi /boot/EFI/Linux/
 ```
 
@@ -59,7 +61,7 @@ That's it — no additional configuration needed. The `.efi` file is a Unified K
 
 Copy the kernel and initramfs to your boot partition:
 
-```
+```bash
 sudo cp vmlinuz-detkernel-universal /boot/
 sudo cp initramfs-detkernel-universal.img /boot/
 ```
@@ -76,7 +78,7 @@ menuentry "detkernel-universal" {
 
 Replace `YOUR_UUID` with your root partition UUID (find it with `blkid`), then update GRUB:
 
-```
+```bash
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
@@ -84,7 +86,7 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 Copy the kernel and initramfs to your boot partition:
 
-```
+```bash
 sudo cp vmlinuz-detkernel-universal /boot/
 sudo cp initramfs-detkernel-universal.img /boot/
 ```
@@ -99,17 +101,48 @@ Replace `YOUR_UUID` with your root partition UUID.
 
 ---
 
+## Secure Boot
+
+detkernel is not signed with a distro key, so it won't boot with Secure Boot enabled out of the box. You have two options:
+
+**Option 1 — Disable Secure Boot** (simplest)
+
+Go into your BIOS/UEFI settings and disable Secure Boot.
+
+**Option 2 — Enroll your own MOK key** (keeps Secure Boot enabled)
+
+```bash
+# Install sbsigntools (Arch/Manjaro)
+sudo pacman -S sbsigntools
+
+# Generate a key pair
+openssl req -new -x509 -newkey rsa:2048 -keyout MOK.key -out MOK.crt \
+  -days 3650 -subj "/CN=detkernel MOK/" -nodes
+
+# Sign the UKI
+sudo sbsign --key MOK.key --cert MOK.crt \
+  --output /boot/EFI/Linux/detkernel-universal.efi \
+  /boot/EFI/Linux/detkernel-universal.efi
+
+# Enroll the key (will prompt on next reboot)
+sudo mokutil --import MOK.crt
+```
+
+Reboot, follow the MOK enrollment prompt, and Secure Boot will accept the kernel.
+
+---
+
 ## Uninstall
 
 ### systemd-boot
 
-```
+```bash
 sudo rm /boot/EFI/Linux/detkernel-universal.efi
 ```
 
 ### GRUB / rEFInd
 
-```
+```bash
 sudo rm /boot/vmlinuz-detkernel-universal
 sudo rm /boot/initramfs-detkernel-universal.img
 ```
@@ -121,5 +154,6 @@ Remove the boot entry you added, then update your bootloader config.
 ## License
 
 GPL-2.0 — same as the Linux kernel.
+
 
 Logo is generated with Gemini
