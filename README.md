@@ -167,6 +167,3 @@ Remove the boot entry you added, then update your bootloader config.
 ## License
 
 GPL-2.0 — same as the Linux kernel.
-
-
-Logo is generated with Gemini
